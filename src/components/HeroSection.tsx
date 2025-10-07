@@ -68,8 +68,8 @@ const HeroSection = () => {
           </div>
 
           {/* Right Image */}
-          <div className="hidden lg:block">
-            <div className="relative rounded-3xl overflow-hidden shadow-medium">
+          <div className="w-full">
+            <div className="relative rounded-3xl overflow-hidden shadow-medium h-[300px] md:h-[400px] lg:h-[500px]">
               <img 
                 src={heroImage} 
                 alt="Modern student hostel with students studying and socializing"
