@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import HostelMap from "@/components/HostelMap";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +15,10 @@ const HostelDetail = () => {
     name: "Sunrise Student Residency",
     location: "Near IIT Delhi",
     distance: "0.5 km from campus",
+    coordinates: {
+      longitude: 77.1925,
+      latitude: 28.5449,
+    },
     roomTypes: [
       { type: "Single AC", price: 10000, available: 2 },
       { type: "Double Sharing AC", price: 8500, available: 4 },
@@ -140,6 +145,19 @@ const HostelDetail = () => {
                   </li>
                 ))}
               </ul>
+            </Card>
+
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Location</h2>
+              <HostelMap 
+                longitude={hostel.coordinates.longitude}
+                latitude={hostel.coordinates.latitude}
+                hostelName={hostel.name}
+              />
+              <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+                <MapPin className="h-4 w-4" />
+                <span>{hostel.location} • {hostel.distance}</span>
+              </div>
             </Card>
           </div>
 
