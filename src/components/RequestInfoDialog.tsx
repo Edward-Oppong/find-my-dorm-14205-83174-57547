@@ -55,10 +55,22 @@ const RequestInfoDialog = ({ hostelName }: RequestInfoDialogProps) => {
     setLoading(false);
   };
 
+  console.log("RequestInfoDialog rendered, open state:", open);
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(newOpen) => {
+      console.log("Dialog open state changing to:", newOpen);
+      setOpen(newOpen);
+    }}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full" size="lg">Request Info</Button>
+        <Button 
+          variant="outline" 
+          className="w-full" 
+          size="lg"
+          onClick={() => console.log("Request Info button clicked")}
+        >
+          Request Info
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>

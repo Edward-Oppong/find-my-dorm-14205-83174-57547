@@ -59,10 +59,21 @@ const BookingDialog = ({ hostelName, roomTypes }: BookingDialogProps) => {
     setLoading(false);
   };
 
+  console.log("BookingDialog rendered, open state:", open);
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(newOpen) => {
+      console.log("Dialog open state changing to:", newOpen);
+      setOpen(newOpen);
+    }}>
       <DialogTrigger asChild>
-        <Button className="w-full" size="lg">Book Now</Button>
+        <Button 
+          className="w-full" 
+          size="lg"
+          onClick={() => console.log("Book Now button clicked")}
+        >
+          Book Now
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
