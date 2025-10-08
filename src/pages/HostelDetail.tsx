@@ -1,10 +1,11 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import HostelMap from "@/components/HostelMap";
-import { Button } from "@/components/ui/button";
+import BookingDialog from "@/components/BookingDialog";
+import RequestInfoDialog from "@/components/RequestInfoDialog";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Star, Wifi, Utensils, Shield, Phone, Mail } from "lucide-react";
+import { MapPin, Star, Wifi, Phone, Mail } from "lucide-react";
 import { useParams } from "react-router-dom";
 
 const HostelDetail = () => {
@@ -173,8 +174,8 @@ const HostelDetail = () => {
               </div>
 
               <div className="space-y-2">
-                <Button className="w-full" size="lg">Book Now</Button>
-                <Button variant="outline" className="w-full" size="lg">Request Info</Button>
+                <BookingDialog hostelName={hostel.name} roomTypes={hostel.roomTypes} />
+                <RequestInfoDialog hostelName={hostel.name} />
               </div>
 
               <div className="pt-4 border-t space-y-3">
