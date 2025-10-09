@@ -81,6 +81,11 @@ const Footer = () => {
                   Support
                 </Link>
               </li>
+              <li>
+                <Link to="/admin" className="text-muted-foreground hover:text-primary transition-colors">
+                  Admin Dashboard
+                </Link>
+              </li>
             </ul>
           </div>
 

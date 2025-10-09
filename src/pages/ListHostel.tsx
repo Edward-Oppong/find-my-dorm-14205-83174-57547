@@ -8,6 +8,7 @@ import { Check, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
 
 const roomTypeSchema = z.object({
   type: z.string().min(1, "Room type is required").max(50),
@@ -59,7 +60,7 @@ const ListHostel = () => {
     setRoomTypes(updated);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
@@ -72,8 +73,32 @@ const ListHostel = () => {
         })),
       });
 
-      console.log("Form submitted:", validatedData);
-      
+      // Calculate average price from room types
+      const avgPrice = Math.round(
+        roomTypes.reduce((sum, rt) => sum + Number(rt.price), 0) / roomTypes.length
+      );
+
+      // Prepare amenities array
+      const amenitiesArray = validatedData.amenities
+        ? validatedData.amenities.split(',').map(a => a.trim()).filter(Boolean)
+        : [];
+
+      // Insert into hostel_applications table
+      const { error } = await supabase
+        .from("hostel_applications")
+        .insert({
+          name: validatedData.name,
+          location: validatedData.address,
+          price: avgPrice,
+          description: validatedData.additionalInfo || null,
+          amenities: amenitiesArray.length > 0 ? amenitiesArray : null,
+          contact_email: validatedData.email,
+          contact_phone: validatedData.contact,
+          status: "pending",
+        });
+
+      if (error) throw error;
+
       toast({
         title: "Application Submitted!",
         description: "Our team will review your application and get back to you within 48 hours.",
@@ -96,6 +121,13 @@ const ListHostel = () => {
         toast({
           title: "Validation Error",
           description: error.errors[0].message,
+          variant: "destructive",
+        });
+      } else {
+        console.error("Error submitting application:", error);
+        toast({
+          title: "Submission Failed",
+          description: "Failed to submit your application. Please try again.",
           variant: "destructive",
         });
       }

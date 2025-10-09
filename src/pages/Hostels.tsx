@@ -3,18 +3,67 @@ import FilterBar from "@/components/FilterBar";
 import HostelCard from "@/components/HostelCard";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Hostels = () => {
+  const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [genderFilter, setGenderFilter] = useState("all");
   const [priceFilter, setPriceFilter] = useState("all");
   const [sortBy, setSortBy] = useState("distance");
   const [currentPage, setCurrentPage] = useState(1);
+  const [hostels, setHostels] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const itemsPerPage = 6;
-  const hostels = [
+
+  useEffect(() => {
+    fetchHostels();
+  }, []);
+
+  const fetchHostels = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("hostels")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      // Transform database hostels to match the component's expected format
+      const transformedHostels = (data || []).map((hostel: any) => ({
+        id: hostel.id,
+        name: hostel.name,
+        location: hostel.location,
+        distance: "N/A",
+        price: hostel.price,
+        rating: hostel.rating || 4.5,
+        reviews: 0,
+        image: hostel.image_url || "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800&h=600&fit=crop",
+        gender: "co-ed" as const,
+        amenities: hostel.amenities || ["wifi", "food", "security"],
+        available: 5,
+      }));
+
+      setHostels(transformedHostels);
+    } catch (error) {
+      console.error("Error fetching hostels:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load hostels",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fallback hostels for demo purposes
+  const fallbackHostels = [
     {
       id: "1",
       name: "Sunrise Student Residency",
@@ -95,8 +144,11 @@ const Hostels = () => {
     },
   ];
 
+  // Combine database hostels with fallback hostels
+  const allHostels = [...hostels, ...fallbackHostels];
+
   const filteredHostels = useMemo(() => {
-    let filtered = [...hostels];
+    let filtered = [...allHostels];
 
     // Search filter
     if (searchQuery) {
@@ -141,7 +193,7 @@ const Hostels = () => {
     });
 
     return filtered;
-  }, [hostels, searchQuery, genderFilter, priceFilter, sortBy]);
+  }, [allHostels, searchQuery, genderFilter, priceFilter, sortBy]);
 
   // Pagination calculations
   const totalPages = Math.ceil(filteredHostels.length / itemsPerPage);
@@ -197,23 +249,27 @@ const Hostels = () => {
         <div className="mb-6">
           <h1 className="text-2xl font-bold mb-1">Available Hostels</h1>
           <p className="text-muted-foreground">
-            {filteredHostels.length} hostels found
-            {totalPages > 1 && ` • Page ${currentPage} of ${totalPages}`}
+            {loading ? "Loading..." : `${filteredHostels.length} hostels found`}
+            {!loading && totalPages > 1 && ` • Page ${currentPage} of ${totalPages}`}
           </p>
         </div>
 
         {/* Results Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {paginatedHostels.length > 0 ? (
-            paginatedHostels.map((hostel) => (
-              <HostelCard key={hostel.id} {...hostel} />
-            ))
-          ) : (
-            <div className="col-span-full text-center py-12">
-              <p className="text-muted-foreground">No hostels found matching your criteria.</p>
-            </div>
-          )}
-        </div>
+        {loading ? (
+          <div className="text-center py-12">Loading hostels...</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {paginatedHostels.length > 0 ? (
+              paginatedHostels.map((hostel) => (
+                <HostelCard key={hostel.id} {...hostel} />
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12">
+                <p className="text-muted-foreground">No hostels found matching your criteria.</p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Pagination */}
         {totalPages > 1 && (
